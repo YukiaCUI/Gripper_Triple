@@ -1,5 +1,7 @@
 --cpu Cortex-M3
 "rotary_encoder\startup_stm32f103xb.o"
+"rotary_encoder\mt6701.o"
+"rotary_encoder\as5600.o"
 "rotary_encoder\main.o"
 "rotary_encoder\gpio.o"
 "rotary_encoder\adc.o"
@@ -8,8 +10,6 @@
 "rotary_encoder\usart.o"
 "rotary_encoder\stm32f1xx_it.o"
 "rotary_encoder\stm32f1xx_hal_msp.o"
-"rotary_encoder\mt6701.o"
-"rotary_encoder\as5600.o"
 "rotary_encoder\stm32f1xx_hal_gpio_ex.o"
 "rotary_encoder\stm32f1xx_hal_adc.o"
 "rotary_encoder\stm32f1xx_hal_adc_ex.o"

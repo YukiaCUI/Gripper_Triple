@@ -34,6 +34,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+#define SAMP 1
 
 /* USER CODE END PTD */
 
@@ -50,7 +51,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t adc_convert_cplt;
+uint8_t dma_end_flag = 0;
+uint32_t AD_DMA[SAMP]={0};
+float adc1_angle[SAMP]={0};
 float angle;
 int16_t angle_int;
 /* USER CODE END PV */
@@ -63,16 +66,18 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+int fputc(int ch, FILE *f) {
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
+  return ch;
+}
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)		//DMA采集完成中断服务函数
 {
-	uint16_t value;
-	if(HAL_IS_BIT_SET(HAL_ADC_GetState(&hadc1), HAL_ADC_STATE_REG_EOC))
+	if(hadc->Instance == ADC1)
 	{
-		value = HAL_ADC_GetValue(&hadc1);
-		angle = value * 3.3 / 16384 * 360;
-		adc_convert_cplt = 1;
+		dma_end_flag = 1;
 	}
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -132,16 +137,20 @@ int main(void)
 		
 		
 		/**********************MT6701 Analog********************/
-		/*
-		if(adc_convert_cplt == 1)
+		
+		HAL_ADC_Start_DMA(&hadc1, AD_DMA, SAMP);
+		HAL_Delay(100);
+		if(dma_end_flag == 1)
 		{
-			memset(txbuf,0,sizeof(txbuf));
-			len = sprintf(txbuf,"angle=%1.3f\n",angle);
-			if(len > 0)
-				HAL_UART_Transmit_IT(&huart1,(uint8_t*)txbuf,len);
-			adc_convert_cplt = 0;
+			dma_end_flag = 0;
+			for(uint8_t i=0;i<SAMP;i++)
+			{
+				adc1_angle[i] = (float)AD_DMA[i]* 3.3 / 16384 * 360;
+				//printf("adc_angle%d = %.03f\r\n",i,adc1_angle[i]);
+				printf("adc_angle=%.03f\n",adc1_angle[i]);
+			}
 		}
-		*/
+		
 		
 		/**********************MT6701 IIC********************/
 		/*
@@ -151,17 +160,17 @@ int main(void)
 			if(len > 0)
 				HAL_UART_Transmit_IT(&huart1,(uint8_t*)txbuf,len);
 		
-		HAL_Delay(30);
 		*/
 		/**********************MT6701 IIC********************/
-		
+		/*
 		i2c_mt6701_get_angle(&angle_int, &angle);
 		len = sprintf(txbuf,"angle=%.03f\n",angle);
 			if(len > 0)
 				HAL_UART_Transmit_IT(&huart1,(uint8_t*)txbuf,len);
 		
-		HAL_Delay(30);
+		*/
 		
+		HAL_Delay(30);
   }
   /* USER CODE END 3 */
 }
