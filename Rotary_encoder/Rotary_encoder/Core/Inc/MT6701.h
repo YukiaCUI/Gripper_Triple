@@ -15,7 +15,7 @@
 
 
 
-void i2c_mt6701_get_angle(int16_t *angle_int, float *angle);
+void i2c_mt6701_get_angle(I2C_HandleTypeDef *hi2c, int16_t *angle_int, float *angle);
 
 #endif
 

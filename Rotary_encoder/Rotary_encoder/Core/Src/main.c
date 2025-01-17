@@ -54,8 +54,8 @@
 uint8_t dma_end_flag = 0;
 uint32_t AD_DMA[SAMP]={0};
 float adc1_angle[SAMP]={0};
-float angle;
-int16_t angle_int;
+int16_t angle_int1, angle_int2;
+float angle1, angle2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,7 +70,7 @@ int fputc(int ch, FILE *f) {
   HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
   return ch;
 }
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)		//DMA²É¼¯Íê³ÉÖÐ¶Ï·þÎñº¯Êý
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)		//DMAï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ï·ï¿½ï¿½ï¿½ï¿½ï¿½
 {
 	if(hadc->Instance == ADC1)
 	{
@@ -114,6 +114,7 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_UART_Init();
   MX_I2C1_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
 	HAL_ADC_Start_IT(&hadc1);
   /* USER CODE END 2 */
@@ -137,7 +138,7 @@ int main(void)
 		
 		
 		/**********************MT6701 Analog********************/
-		
+		/*
 		HAL_ADC_Start_DMA(&hadc1, AD_DMA, SAMP);
 		HAL_Delay(100);
 		if(dma_end_flag == 1)
@@ -150,25 +151,25 @@ int main(void)
 				printf("adc_angle=%.03f\n",adc1_angle[i]);
 			}
 		}
+		*/
 		
-		
-		/**********************MT6701 IIC********************/
+		/**********************AS5600 IIC********************/
 		/*
 		i2c_as5600_get_angle(&angle_int, &angle);
-		
-		len = sprintf(txbuf,"angle=%.03f\n",angle);
-			if(len > 0)
-				HAL_UART_Transmit_IT(&huart1,(uint8_t*)txbuf,len);
-		
+		printf("angle=%.03f\n",angle);
 		*/
+		
 		/**********************MT6701 IIC********************/
-		/*
-		i2c_mt6701_get_angle(&angle_int, &angle);
-		len = sprintf(txbuf,"angle=%.03f\n",angle);
-			if(len > 0)
-				HAL_UART_Transmit_IT(&huart1,(uint8_t*)txbuf,len);
 		
-		*/
+    // ä½¿ç”¨ I2C1
+    i2c_mt6701_get_angle(&hi2c1, &angle_int1, &angle1);
+    //printf("I2C1 angle=%.03f\n", angle1);
+
+    // ä½¿ç”¨ I2C2
+    i2c_mt6701_get_angle(&hi2c2, &angle_int2, &angle2);
+    //printf("I2C2 angle=%.03f\n", angle2);
+		
+		printf("%.3f, %.3f\r\n", angle1, angle2);
 		
 		HAL_Delay(30);
   }
