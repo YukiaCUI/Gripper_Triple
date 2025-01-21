@@ -14,8 +14,13 @@
 #define as5600_log		printf
 
 
-
 void i2c_as5600_get_angle(int16_t *angle_int, float *angle);
+
+unsigned char as5600_write_reg_with_mux(I2C_HandleTypeDef *hi2c, uint8_t channel, unsigned char reg, unsigned char value);
+unsigned char as5600_write_regs_with_mux(I2C_HandleTypeDef *hi2c, uint8_t channel, unsigned char reg, unsigned char *value, unsigned char len);
+unsigned char as5600_read_reg_with_mux(I2C_HandleTypeDef *hi2c, uint8_t channel, unsigned char reg, unsigned char* buf, unsigned short len);
+void i2c_as5600_get_angle_with_mux(I2C_HandleTypeDef *hi2c, uint8_t channel, int16_t *angle_int, float *angle);
+
 
 #endif
 

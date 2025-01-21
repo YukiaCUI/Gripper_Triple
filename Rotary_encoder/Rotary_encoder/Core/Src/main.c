@@ -54,8 +54,8 @@
 uint8_t dma_end_flag = 0;
 uint32_t AD_DMA[SAMP]={0};
 float adc1_angle[SAMP]={0};
-int16_t angle_int1, angle_int2;
-float angle1, angle2;
+int16_t angle_int1, angle_int2, angle_int3;
+float angle1, angle2, angle3;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,7 +70,7 @@ int fputc(int ch, FILE *f) {
   HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
   return ch;
 }
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)		//DMA�ɼ�����жϷ�����
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if(hadc->Instance == ADC1)
 	{
@@ -154,22 +154,42 @@ int main(void)
 		*/
 		
 		/**********************AS5600 IIC********************/
-		/*
-		i2c_as5600_get_angle(&angle_int, &angle);
-		printf("angle=%.03f\n",angle);
-		*/
+		
+	  i2c_as5600_get_angle_with_mux(&hi2c1, 2, &angle_int3, &angle3);
+		
+
+    /**********************TCA9548A test********************/
+    // tca9548a_set_channel(&hi2c1, 0);
+    // for (uint8_t addr = 0; addr < 128; addr++) {
+    //   if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 1, 10) == HAL_OK) {
+    //       printf("Device found at 0x%02X\n", addr);
+    //   }
+    // } 
+
+    // if (HAL_I2C_IsDeviceReady(&hi2c1, TCA9548A_SLAVE_ADDR << 1, 1, 10) == HAL_OK) {
+    //     printf("TCA9548A detected at 0x%02X\n", TCA9548A_SLAVE_ADDR);
+    // } else {
+    //     printf("TCA9548A not detected\n");
+    // }
 		
 		/**********************MT6701 IIC********************/
 		
     // 使用 I2C1
-    i2c_mt6701_get_angle(&hi2c1, &angle_int1, &angle1);
+    // i2c_mt6701_get_angle(&hi2c1, &angle_int1, &angle1);
     //printf("I2C1 angle=%.03f\n", angle1);
 
+    // 使用 TCA9548A 的 I2C1，选择通道 0
+    i2c_mt6701_get_angle_with_mux(&hi2c1, 0, &angle_int1, &angle1);
+
+    // 使用 TCA9548A 的 I2C1，选择通道 1
+    i2c_mt6701_get_angle_with_mux(&hi2c1, 1, &angle_int2, &angle2);
+
     // 使用 I2C2
-    i2c_mt6701_get_angle(&hi2c2, &angle_int2, &angle2);
+    // i2c_mt6701_get_angle(&hi2c2, &angle_int2, &angle2);
     //printf("I2C2 angle=%.03f\n", angle2);
 		
-		printf("%.3f, %.3f\r\n", angle1, angle2);
+		// printf("%.3f, %.3f\r\n", angle1, angle2);
+    printf("angle1=%.3f, angle2=%.3f, angle3=%.3f\r\n", angle1, angle2, angle3);
 		
 		HAL_Delay(30);
   }
