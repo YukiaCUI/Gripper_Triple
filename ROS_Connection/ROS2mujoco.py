@@ -1,11 +1,14 @@
 import mujoco
 import mujoco.viewer
 import numpy as np
+import os
 import rclpy
 from angle_subscriber import AngleSubscriber
 
 # 加载 XML 文件
-MODEL_PATH = "Smart_Hand/ROS_Connection/hinge.xml"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(current_dir, "hinge.xml")
+
 model = mujoco.MjModel.from_xml_path(MODEL_PATH)
 data = mujoco.MjData(model)
 
