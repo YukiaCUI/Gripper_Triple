@@ -13,9 +13,11 @@ class AngleSubscriber(Node):
             10)
         self.subscription  # 让订阅对象不被垃圾回收
 
+        self.latest_angles = []
+
     def listener_callback(self, msg):
-        # 打印接收到的角度数据
-        self.get_logger().info(f'Received angles: {msg.data}')
+        self.latest_angles = msg.data  # 更新最近的数据
+        self.get_logger().info(f'Received angles: {self.latest_angles}')
         
 
 def main(args=None):
