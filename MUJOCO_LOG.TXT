@@ -1,0 +1,9 @@
+Sat Feb  8 14:14:01 2025
+WARNING: Nan, Inf or huge value in QPOS at DOF 1. The simulation is unstable. Time = 0.0000.
+
+Sat Feb  8 14:14:48 2025
+WARNING: Nan, Inf or huge value in QPOS at DOF 1. The simulation is unstable. Time = 0.0000.
+
+Sat Feb  8 14:15:46 2025
+WARNING: Nan, Inf or huge value in QPOS at DOF 1. The simulation is unstable. Time = 0.0000.
+
