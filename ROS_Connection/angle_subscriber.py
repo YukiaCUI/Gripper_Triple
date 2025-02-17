@@ -17,7 +17,7 @@ class AngleSubscriber(Node):
 
     def listener_callback(self, msg):
         self.latest_angles = msg.data  # 更新最近的数据
-        self.get_logger().info(f'Received angles: {self.latest_angles}')
+        # self.get_logger().info(f'Received angles: {self.latest_angles}')
         
 
 def main(args=None):

@@ -1,0 +1,46 @@
+<mujoco model="simple_joint">
+
+    <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
+    rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+    <material name="grid" texture="grid" texrepeat="2 2" texuniform="true"
+    reflectance=".2"/>
+  </asset>
+
+    <compiler angle="degree"/>
+    <option timestep="0.01"/>
+    
+    <worldbody>
+        <light pos="0 0 1" mode="trackcom"/>
+        <geom name="ground" type="plane" size="2 2 .1" material="grid" solimp=".99 .99 .01" solref=".001 1"/>
+        <!-- 固定基座 -->
+        <body name="base" pos="0 0 0">
+            <body name="link">
+                <joint name="hinge" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
+                <geom name="hinge" type="capsule" fromto="0 0 0 0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
+                
+                <body name="indicator" pos="0 0.5 0.2">
+                    <geom name="indicator_geom" type="box" size="0.02 0.5 0.005" rgba="0 0 1 1"/>
+                    <site name="indicator_site" pos="0 0 0" size="0.01"/>
+                </body>
+            </body>
+        </body>
+
+
+    </worldbody>
+
+    <!-- 添加 actuator -->
+    <actuator>
+        <motor joint="hinge" ctrlrange="-500 500"/>
+    </actuator>
+
+    <sensor>
+        <!-- 使用 site 测量力 -->
+        <force name="indicator_force" site="indicator_site"/>
+
+        <touch name="touch" site="indicator_site" />
+
+    </sensor>
+
+</mujoco>
+

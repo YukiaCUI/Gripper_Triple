@@ -5,6 +5,7 @@ import os
 import rclpy
 import time
 from angle_subscriber import AngleSubscriber
+from position_control import PositionController
 
 # 加载 XML 文件
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,8 +18,18 @@ data = mujoco.MjData(model)
 rclpy.init()
 angle_subscriber = AngleSubscriber()
 
-current_angles = np.copy(data.qpos) 
 last_timestamp = None  # 记录上一次消息的时间
+
+zero_angles = [77.36572265625, 169.47509765625, 324.8876953125, 109.57763671875, 230.25146484375, 353.5400390625, 282.67822265625, 352.265625]
+
+
+joint_names = [model.joint(i).name for i in range(model.njnt)]
+
+circle = [0, 0, 0, 0, 0, 0, 0, 0]
+previous_angle = [0, 0, 0, 0, 0, 0, 0, 0]
+
+
+controllers = [PositionController(model, data, joint_name) for joint_name in joint_names]
 
 # 打开 MuJoCo Viewer 进行仿真
 with mujoco.viewer.launch_passive(model, data) as viewer:
@@ -32,19 +43,28 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             current_timestamp = time.time()
             if last_timestamp is not None:
                 delta_time = current_timestamp - last_timestamp
-                print(f"Time interval between messages: {delta_time:.6f} seconds")
+                # print(f"Time interval between messages: {delta_time:.6f} seconds")
             last_timestamp = current_timestamp
 
-            # 确保 angles 是一个列表或数组
-            for i in range(len(angles)):  # 避免索引越界
-                if not np.isnan(angles[i]):  # 仅更新非 NaN 值
-                    current_angles[i] = np.deg2rad(angles[i])
+            # 更新控制器的目标位置
+            for i,controller in enumerate(controllers):
+                if not np.isnan(angles[i]):
+                    current_angle = angles[i] - zero_angles[i]
+                    if current_angle < 0:
+                        current_angle += 360
 
-            # print("Current angles:", np.rad2deg(current_angles))
+                    if current_angle - previous_angle[i] > 180:
+                        circle[i] -= 1
+                    elif current_angle - previous_angle[i] < -180:
+                        circle[i] += 1
+                    
+                    target_angle = current_angle + circle[i] * 360
 
-            # 更新 MuJoCo 模型中的关节角度
-            for i in range(len(current_angles)):
-                data.qpos[i] = current_angles[i]
+                    controller.set_target_position(target_angle)
+                    controller.update_control()
+                    previous_angle[i] = current_angle
+
+                    print(f"Joint {joint_names[i]}  target:{target_angle:.2f} degrees current:{current_angle:.2f} previous :{previous_angle[i]:.2f} degrees")
 
             # 进行物理仿真一步
             mujoco.mj_step(model, data)

@@ -3,17 +3,33 @@ import mujoco.viewer
 import numpy as np
 import time
 import os
+import sys
+
+# 解析命令行参数，选择 XML 模型文件
+if len(sys.argv) > 1:
+    model_file = sys.argv[1]  # 用户提供的文件名
+else:
+    model_file = "finger.xml"  # 默认文件
 
 # 初始化模型和仿真
 current_dir = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(current_dir, "finger.xml")
+MODEL_PATH = os.path.join(current_dir, model_file)
+
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"模型文件 {MODEL_PATH} 不存在，请检查路径！")
+
 model = mujoco.MjModel.from_xml_path(MODEL_PATH)
 data = mujoco.MjData(model)
 
 # 控制参数
-kp = 50.0    # 比例增益
-ki = 50.0     # 积分增益（新增加）
-kd = 1.0     # 微分增益
+kp = 14.0    # 比例增益
+ki = 0.0     # 积分增益
+kd = 0.1    # 微分增益
+# 力控制增益
+m_d = 0.5  # 虚拟质量
+b_d = 5.0  # 阻尼
+k_d = 10.0 # 刚度
+dt = 0.001 # 仿真步长
 desired_torque = 10.0  # 目标力矩
 torque_control_gain = 0.2  # 力矩控制增益
 target_pos = np.deg2rad(90)  # 目标位置
@@ -21,59 +37,36 @@ target_pos = np.deg2rad(90)  # 目标位置
 # 积分误差初始化
 integral_error = 0.0
 integral_limit = 50.0  # 限制积分项大小，防止积分饱和
+previous_pos = 0.0  # 记录前一次位置
+previous_vel = 0.0  # 记录前一次速度
+previous_acc = 0.0  # 记录前一次加速度
+in_contact = False
+zero_force_count = 0
 
-# visualize contact frames and forces, make body transparent
-options = mujoco.MjvOption()
-mujoco.mjv_defaultOption(options)
-options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
-options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
-options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-
-# 创建查看器
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
         # 获取当前关节位置和速度
         current_pos = data.joint('hinge').qpos[0]
         current_vel = data.joint('hinge').qvel[0]
-        
-        # 计算误差
+
+        # PID 控制部分
         error = target_pos - current_pos
-
-        # **积分误差更新**
-        integral_error += error * 0.001  # 积分项（0.001 代表仿真时间步长）
-
-        # **积分限幅**
+        integral_error += error
         integral_error = np.clip(integral_error, -integral_limit, integral_limit)
+        derivative_pos = current_pos - previous_pos
+        torque = kp * error + ki * integral_error + kd * derivative_pos
 
-        # 计算 PID 控制输出
-        torque = kp * error + ki * integral_error - kd * current_vel
-
-        # 当前驱动力矩
-        current_actuator_torque = data.qfrc_actuator[0]
-
-        # **计算力控修正项**
-        torque_error = desired_torque - current_actuator_torque
-        torque_correction = torque_control_gain * torque_error
-
-        # **添加力控修正项**
-        torque += torque_correction
-
-        # **应用力矩**
         data.ctrl[0] = torque
-        
-        # 步进仿真
+
+        # 更新上一帧数据
+        previous_pos = current_pos
+        previous_vel = current_vel
+        previous_acc = current_vel - previous_vel
+
+        # 步进仿真并更新可视化
         mujoco.mj_step(model, data)
-        
-        # 记录数据
-        torque_actuator = data.qfrc_actuator[0]
-        print(f"Actuator torque: {torque_actuator:.2f} Nm")
+        print(f"Actuator torque: {torque:.2f} Nm")
         print(f"Current position: {np.rad2deg(current_pos):.2f} degrees")
         print(f"Target position: {np.rad2deg(target_pos):.2f} degrees")
-
-        # 更新可视化
         viewer.sync()
         time.sleep(0.001)  # 控制运行速度
-
-        # # **每 5 秒切换目标位置**
-        # if data.time % 5 < 0.01:
-        #     target_pos = -target_pos

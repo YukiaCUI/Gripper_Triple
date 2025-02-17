@@ -1,24 +1,26 @@
 <mujoco model="simple_joint">
+    <asset>
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
+                 rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+        <material name="grid" texture="grid" texrepeat="2 2" texuniform="true" reflectance=".2"/>
+    </asset>
+
     <compiler angle="degree"/>
     <option timestep="0.01"/>
 
     <worldbody>
+        <light pos="0 0 1" mode="trackcom"/>
+        <geom name="ground" type="plane" size="5 5 10" material="grid" 
+            friction="1 0.05 0.0001"/>
+        <camera name="y" pos="-.1 -.6 .3" xyaxes="1 0 0 0 1 2"/>
+
         <!-- 固定基座 -->
         <body name="base" pos="0 0 0">
             <geom type="box" size="0.7 0.7 0.2" rgba="0.2 0.2 0.2 1"/>
-            
-            <!-- 旋转关节 S -->
-            <body name="link_s" pos="-0.5 0.5 0.2">
-                <joint name="hinge_s" type="hinge" axis="0 0 1" pos="0 0 0"/>
-                <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
-                <body name="indicator_s" pos="0 0.1 0.2">
-                    <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
-                </body>
-            </body>
 
             <!-- 旋转关节 0 -->
             <body name="link_0" pos="0 0.5 0.2">
-                <joint name="hinge_0" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_0" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_0" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -27,7 +29,7 @@
 
             <!-- 旋转关节 1 -->
             <body name="link_1" pos="0.5 0.5 0.2">
-                <joint name="hinge_1" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_1" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_1" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -36,7 +38,7 @@
 
             <!-- 旋转关节 2 -->
             <body name="link_2" pos="-0.5 0 0.2">
-                <joint name="hinge_2" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_2" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_2" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -45,7 +47,7 @@
 
             <!-- 旋转关节 3 -->
             <body name="link_3" pos="0 0 0.2">
-                <joint name="hinge_3" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_3" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_3" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -54,7 +56,7 @@
 
             <!-- 旋转关节 4 -->
             <body name="link_4" pos="0.5 0 0.2">
-                <joint name="hinge_4" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_4" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_4" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -63,7 +65,7 @@
 
             <!-- 旋转关节 5 -->
             <body name="link_5" pos="-0.5 -0.5 0.2">
-                <joint name="hinge_5" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_5" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_5" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -72,7 +74,7 @@
 
             <!-- 旋转关节 6 -->
             <body name="link_6" pos="0 -0.5 0.2">
-                <joint name="hinge_6" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_6" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_6" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -81,7 +83,7 @@
 
             <!-- 旋转关节 7 -->
             <body name="link_7" pos="0.5 -0.5 0.2">
-                <joint name="hinge_7" type="hinge" axis="0 0 1" pos="0 0 0"/>
+                <joint name="hinge_7" type="hinge" axis="0 0 1" damping="2.0" frictionloss="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 0.2" size="0.05" rgba="0.53 0.81 0.92 1"/>
                 <body name="indicator_7" pos="0 0.1 0.2">
                     <geom type="box" size="0.02 0.1 0.005" rgba="0 0 1 1"/>
@@ -90,4 +92,16 @@
 
         </body>
     </worldbody>
+
+    <actuator>
+        <motor joint="hinge_0" ctrlrange="-500 500"/>
+        <motor joint="hinge_1" ctrlrange="-500 500"/>
+        <motor joint="hinge_2" ctrlrange="-500 500"/>
+        <motor joint="hinge_3" ctrlrange="-500 500"/>
+        <motor joint="hinge_4" ctrlrange="-500 500"/>
+        <motor joint="hinge_5" ctrlrange="-500 500"/>
+        <motor joint="hinge_6" ctrlrange="-500 500"/>
+        <motor joint="hinge_7" ctrlrange="-500 500"/>
+    </actuator>
+
 </mujoco>
